@@ -1,28 +1,69 @@
+'''
+This is a tool to scrape the data of courses from the website sis.hust.edu.vn.
+The information includes:
+    - Course code
+    - Course name
+    - Time
+    - Number of credits
+    - Tuition credits
+    - Conditional course
+    - English name
+    - Abbreviation
+    - Institute of Management
+
+'''
+
 import scrapy
 from scrapy.selector import Selector
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import selenium.common.exceptions as exception
-
 import logging
 import time
 
-
 class CoursesList(scrapy.Spider):
+    '''
+    A class used to represent an Spider
+
+    Variable:
+         name (str): Name of Spider
+         allowed_domains (arr): An optional list of strings containing domains that this spider is allowed to crawl
+    '''
+
     name = "course"
     allowed_domains = ['sis.hust.edu.vn']
 
-    # start_urls = ["http://sis.hust.edu.vn/ModuleProgram/CourseLists.aspx"]
-
-    # PATH = "D:\chromedriver\chromedriver.exe"
-    # driver = webdriver.Chrome(PATH)
-    # driver.get("http://sis.hust.edu.vn/ModuleProgram/CourseLists.aspx")
-
     def start_requests(self):
+        '''
+        The function makes a request which the spider will collect data from.
+
+        Parameter:
+            self: Reference to the current instance of the class
+
+        variable:
+            url: The web address will crawl the data
+
+        Return:
+            A request to a web page whose address is stored in the url variable and executes a callback function parse_source
+        '''
+
         url = "http://sis.hust.edu.vn/ModuleProgram/CourseLists.aspx"
         yield scrapy.Request(url=url, callback=self.parse_sourse)
 
     def parse_sourse(self, response):
+        '''
+        Extract data, get necessary information, simulate operations
+
+        Parameter:
+            self: Reference to the current instance of the class
+            response: The site's response to the request
+
+        Variable:
+            option: Manage ChromeDriver specific options
+            desired_capabilities: Store 1 option of ChromeDriver
+            driver: The instance of Chrome WebDriver is created with option
+        '''
+
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
         desired_capabilities = options.to_capabilities()
@@ -32,14 +73,25 @@ class CoursesList(scrapy.Spider):
         driver.implicitly_wait(2)
 
         while True:
-            # lay du lieu chung cua cac mon hoc
+            '''
+            Execute it again and again before reaching the last page:
+                - Using Selector to get page_source and save it in variable sel
+                - Extract the required row information
+                - For each row, use a for loop to get the entire subject data
+            '''
+
             sel = Selector(text=driver.page_source)
             courses = sel.xpath("//table[@class='dxgvTable_SisTheme']//tr[@class='dxgvDataRow_SisTheme']")
 
             cnt = len(courses)
 
             for i in range(0, cnt, 1):
-                # an nut xem chi tiet mon hoc
+                '''
+                Simulate the action of pressing the "+" button to see the expanded information of the subjects
+                Extract the necessary data and save it in variables
+                Return: information of required data fields
+                '''
+
                 btn_detail = driver.find_elements(By.XPATH, "//img[@class='dxGridView_gvDetailCollapsedButton_SisTheme']")
                 if i == 0 or i == 1:
                     btn_detail[0].click()
@@ -77,16 +129,15 @@ class CoursesList(scrapy.Spider):
                     "Tên viết tắt": Ten_viet_tat,
                     "Viện quản lý": Vien_quan_ly
                 }
-                # yield items
-            # next_page = driver.find_element(By.XPATH, "//img[@alt='Next']")
-            # next_page.click()
             try:
+                '''Simulate the action of pressing the page switch to continue collecting data'''
                 next_page = driver.find_element(By.XPATH, "//img[@class='dxWeb_pNext_SisTheme']")
                 next_page.click()
                 logging.info("NEXT PAGE INVALITE ------------------------------")
                 time.sleep(1)
             except exception.NoSuchElementException:
+                '''End the crawl when the next page is no longer available'''
                 logging.info("BREAK PAGE ------------------------------")
                 break
-
+        '''Exit the browser window when the crawl is complete'''
         driver.quit()
