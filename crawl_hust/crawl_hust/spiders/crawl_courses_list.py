@@ -17,6 +17,7 @@ import scrapy
 from scrapy.selector import Selector
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as exception
 import logging
 import time
@@ -32,6 +33,7 @@ class CoursesList(scrapy.Spider):
 
     name = "course"
     allowed_domains = ['sis.hust.edu.vn']
+
 
     def start_requests(self):
         '''
@@ -67,10 +69,22 @@ class CoursesList(scrapy.Spider):
         options = webdriver.ChromeOptions()
         options.add_argument("headless")
         desired_capabilities = options.to_capabilities()
-        driver = webdriver.Chrome("D:\chromedriver\chromedriver.exe", desired_capabilities=desired_capabilities)
+        driver = webdriver.Chrome("crawl_hust\driver\chromedriver.exe", desired_capabilities=desired_capabilities)
 
         driver.get("http://sis.hust.edu.vn/ModuleProgram/CourseLists.aspx")
         driver.implicitly_wait(2)
+
+        try:
+            if (self.code != ""):
+                '''
+                Search by course code
+                '''
+                code_search = driver.find_element(By.XPATH, "//*[@id='MainContent_tbCourseID_I']")
+                code_search.send_keys(self.code)
+                code_search.send_keys(Keys.ENTER)
+                time.sleep(0.5)
+        except:
+            logging.info("No argument!!!")
 
         while True:
             '''
@@ -97,7 +111,7 @@ class CoursesList(scrapy.Spider):
                     btn_detail[0].click()
                 else:
                     btn_detail[i-1].click()
-                time.sleep(1)
+                time.sleep(0.5)
 
                 detail = Selector(text=driver.page_source).xpath("//td[@class='dxgv dxgvDetailCell_SisTheme']//b/text()").getall()
                 if len(detail) == 2:
@@ -134,7 +148,7 @@ class CoursesList(scrapy.Spider):
                 next_page = driver.find_element(By.XPATH, "//img[@class='dxWeb_pNext_SisTheme']")
                 next_page.click()
                 logging.info("NEXT PAGE INVALITE ------------------------------")
-                time.sleep(1)
+                time.sleep(0.5)
             except exception.NoSuchElementException:
                 '''End the crawl when the next page is no longer available'''
                 logging.info("BREAK PAGE ------------------------------")

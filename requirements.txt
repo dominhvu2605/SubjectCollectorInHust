@@ -1,0 +1,5 @@
+graphviz==0.17
+Scrapy==2.5.1
+scrapy-selenium==0.0.7
+scrapy-splash==0.8.0
+selenium==4.0.0

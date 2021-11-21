@@ -1,1 +1,2 @@
 scrapy crawl course -O result.csv
+scrapy crawl course -a code=It3030 -O one_course.csv

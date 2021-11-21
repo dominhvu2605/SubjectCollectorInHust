@@ -3,10 +3,10 @@ import csv
 import graphviz
 
 # Use Digraph() for directed graph
-dot = graphviz.Digraph()
+dot = graphviz.Digraph(format='png')
 
 # Read file to get data
-f = open(r"D:\20211\Prj3\Crawl\crawl_hust\result.csv", encoding="utf8")
+f = open(r"../crawl_hust/crawl_result.csv", encoding="utf8")
 line = csv.DictReader(f)
 
 # Read line by line

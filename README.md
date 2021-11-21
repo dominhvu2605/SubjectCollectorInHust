@@ -8,7 +8,10 @@
 ## Installation
 
 - Clone repository
-- pip install scrapy
-- pip install selenium
-- install graphviz
-- Run: scrapy crawl course -O result.csv
+- Run the following command to import the required libraries:
+`pip install -r requirements.txt`
+- If you want to collect data of all subjects, run: 
+`scrapy crawl course -O result.csv`
+- If you want to collect information of a subject, run (with course_code is the subject code you want to collect):
+`scrapy crawl course -a code=course_code -O result_search.csv`
+- To render the relation file of all subjects, run file relationship and result save at folder output
