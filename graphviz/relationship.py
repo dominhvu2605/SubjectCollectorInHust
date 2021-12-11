@@ -1,6 +1,8 @@
 # Visualize the relationship between subjects
 import csv
 import graphviz
+import sys
+import re
 
 # Use Digraph() for directed graph
 dot = graphviz.Digraph(format='png')
@@ -9,15 +11,40 @@ dot = graphviz.Digraph(format='png')
 f = open(r"../crawl_hust/crawl_result.csv", encoding="utf8")
 line = csv.DictReader(f)
 
-# Read line by line
-# If the set has conditional sets, draw the relationship between them
-# Export the results to a file pdf
+#Save data read from file to array
+data = []
 for row in line:
-    if(row['Học phần điều kiện']):
-        course = row['Mã HP']
-        conditionalCourse = row['Học phần điều kiện']
-        dot.node(course, course)
-        dot.node(conditionalCourse, conditionalCourse)
-        dot.edge(course, conditionalCourse)
+    data.append(row)
 
-dot.render('output/round-table.gv', view=False)
+#get parameter is subject code
+if (len(sys.argv) > 1):
+    mahp = sys.argv[1]
+
+# check if the subject has a conditional subject or not
+check = 0
+for row in data:
+    if(row['Mã HP'] != mahp):
+        continue
+    if(row['Học phần điều kiện']):
+        check = 1
+        hpdk = row['Học phần điều kiện']
+        hpdk = re.sub(r"[^a-zA-Z0-9(),/]", "", hpdk)
+        break
+# if subject has no conditional subjects
+if (check == 0):
+    dot.node(mahp)
+# if subject has conditional subjects
+else:
+    while(hpdk != ''):
+        dot.edge(mahp, hpdk)
+        mahp = hpdk
+        check = 0
+        for row in data:
+            if (row['Mã HP'] == mahp):
+                hpdk = row['Học phần điều kiện']
+                check = 1
+                break
+        if(check == 0):
+            hpdk = ''
+
+dot.render('output/round-table.gv', view=True)
