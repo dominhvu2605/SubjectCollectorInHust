@@ -5,7 +5,7 @@ import sys
 import re
 
 # Use Digraph() for directed graph
-dot = graphviz.Digraph(format='png')
+dot = graphviz.Digraph(format='png', graph_attr={'rankdir':'LR'})
 
 # Read file to get data
 f = open(r"../crawl_hust/crawl_result.csv", encoding="utf8")
