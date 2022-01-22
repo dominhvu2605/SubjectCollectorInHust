@@ -14,4 +14,5 @@
 `scrapy crawl course -O result.csv`
 - If you want to collect information of a subject, run (with course_code is the subject code you want to collect):
 `scrapy crawl course -a code=course_code -O result_search.csv`
-- To render the relation file of all subjects, run file relationship and result save at folder output
+- if you want to create a conditional course diagram, run (with course_code is the subject code you want to collect):
+`python relationship.py course_code`
